@@ -12,7 +12,7 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 2
+    NUM_ROUNDS = 60
     POPULATION_SIZE = 6
     ACTION_DECIMAL_PLACES = 3
 
