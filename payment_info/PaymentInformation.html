@@ -1,0 +1,23 @@
+{{ block title }}
+    Auszahlung
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+    Vielen Dank für Ihre Teilnahme an diesem Experiment! Sie haben {{ total_payoff }} Punkte in diesem Experiment verdient. 
+    Für Ihre Teilnahme haben Sie insgesamt <b>{{ participant.payoff_plus_participation_fee }}</b> verdient. 
+    Bitte tragen Sie diesen Betrag und ihre persönlichen Informationen in das Zahlungsformular, das ausgeteilt wird, ein.
+</p>
+<p>
+    Die Auszahlung findet privat im Nebenraum statt. 
+    Bitte geben Sie den Chip mit ihrer Computernummer und den Kugelschreiber bei der Auszahlung wieder ab.
+</p>
+
+<div>
+    <button class="btn btn-primary btn-large">Experiment Beenden</button>
+</div>
+
+{{ endblock }}
+
+
