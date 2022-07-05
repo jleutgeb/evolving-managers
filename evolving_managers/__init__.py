@@ -255,25 +255,23 @@ page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results
 def creating_session(subsession: Subsession):
     # in round 1, assign a player to a population and draw an initial a
     if subsession.round_number == 1:
-        for g in subsession.get_groups():
-            confidence = draw_confidence(g)
-            for p in g.get_players():
-                p.participant.population = (p.participant.id_in_session - 1) // C.POPULATION_SIZE + 1
-                p.participant.total_payoff = 0
-                p.participant.confidence = confidence
-
-    # draw player's initial action
-    for p in subsession.get_players():
-        p.population = p.participant.population
-        p.action = draw_initial_action()
-
-    # shuffle the matching within each population every round
+        for p in subsession.get_players():
+            p.participant.population = (p.participant.id_in_session - 1) // C.POPULATION_SIZE + 1
+            p.participant.total_payoff = 0
+    
+    # shuffle the matching within each population every round (and assign initial confidence)
     players = subsession.get_players()
+    for p in players:
+        p.population = p.participant.population
     num_populations = max([p.population for p in players])
     new_group_matrix = []
     i = 1
     while i <= num_populations:
         population = [p for p in players if p.population == i]
+        if subsession.round_number == 1:
+            confidence = draw_confidence(subsession)
+            for p in population:
+                p.participant.confidence = confidence
         random.shuffle(population)
         j = 0
         while j < len(population):
@@ -287,9 +285,14 @@ def creating_session(subsession: Subsession):
     for g in subsession.get_groups():
         g.gamma = subsession.session.config['gamma']
 
+    # draw player's initial action
+    for p in subsession.get_players():
+        p.population = p.participant.population
+        p.action = draw_initial_action()
 
-def draw_confidence(group):
-    confidence = random.uniform(group.session.config['initial_confidence_lower'], group.session.config['initial_confidence_upper'])
+
+def draw_confidence(subsession):
+    confidence = random.uniform(subsession.session.config['initial_confidence_lower'], subsession.session.config['initial_confidence_upper'])
     return confidence
 
 
