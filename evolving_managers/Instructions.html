@@ -26,8 +26,8 @@
     Dieses Experiment besteht aus {{ num_rounds }} Spielen.
     In jedem Spiel werden Sie vom Computer anonym mit einem anderen zufälligen Mitspieler gematcht.
     Jedes Spiel wird dabei in {{ num_periods }} Perioden unterteilt.
-    In jeder Periode werden Sie und Ihr Gegenüber geheim Aktionen auswählen. 
-    Jene Kombination von Aktionen, die am Ende der Periode von Ihnen und Ihrem Gegenüber ausgewählt wurde, bestimmt Ihren Punktegewinn in dieser Periode.
+    In jeder Periode werden Sie und Ihr Mitspieler geheim Aktionen auswählen. 
+    Jene Kombination von Aktionen, die am Ende der Periode von Ihnen und Ihrem Mitspieler ausgewählt wurde, bestimmt Ihren Punktegewinn in dieser Periode.
 </p>
 
 <p>
@@ -35,9 +35,9 @@
 </p>
 
 <ul>
-    <li>Ihre Punkte in jeder Periode hängen einzig und allein von Ihrer Strategie und der Strategie Ihres Gegenübers ab.</li>
+    <li>Ihre Punkte in jeder Periode hängen einzig und allein von Ihrer Aktion und der Aktion Ihres Mitspielers ab.</li>
     <li>Die Funktion, die Ihre Punkte bestimmt, wird sich während eines Spiels nicht verändern. </li>
-    <li>Wenn Sie und Ihr Gegenüber während eines Spiels die gleichen Aktionen zu den Zeitpunkten A und B wählen, werden Sie beide den gleichen Gewinn zu Zeitpunkt A wie zu Zeitpunkt B machen.</li>
+    <li>Wenn Sie und Ihr Mitspieler während eines Spiels die gleichen Aktionen zu den Zeitpunkten A und B wählen, werden Sie beide den gleichen Gewinn zu Zeitpunkt A wie zu Zeitpunkt B machen.</li>
     <li>Zwischen den Spielen kann sich die Funktion ändern.</li>
 </ul>
 
@@ -46,7 +46,7 @@
 </h5>
 
 <p>
-    Die folgende Abbildung zeigt das Computerdisplay, mit dem Sie Entscheidungen treffen und mit Ihrem Gegenüber interagieren werden. 
+    Die folgende Abbildung zeigt das Computerdisplay, mit dem Sie Entscheidungen treffen und mit Ihrem Mitspieler interagieren werden. 
 </p>
 
 <img src={{ static 'interface.png' }}>
@@ -65,13 +65,13 @@
     Unter diesem Punkt sehen Sie ein <b>rotes Quadrat</b>, das <b>Ihre Aktion</b> in der vergangenen Periode anzeigt.
     Je höher der Punkt, desto mehr Punkte haben Sie gewonnen. 
     Die genaue Anzahl der Punkte, die Sie in diesem Spiel und in der vergangenen Periode verdient haben, können Sie am oberen Bildschirmrand sehen.
-    Gleichzeitig werden Sie am unteren Rand des Bildschirms ein <b>blaues Quadrat</b> sehen, das die <b>Aktion Ihres Gegenübers</b> in der vergangenen Periode anzeigt. 
-    Schließlich werden Sie eine schwarze Linie sehen, die Ihnen anzeigt, wie viele Punkte Sie an jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Gegenüber in der vergangenen Periode gewählt hat.
+    Gleichzeitig werden Sie am unteren Rand des Bildschirms ein <b>blaues Quadrat</b> sehen, das die <b>Aktion Ihres Mitspielers</b> in der vergangenen Periode anzeigt. 
+    Schließlich werden Sie eine schwarze Linie sehen, die Ihnen anzeigt, wie viele Punkte Sie an jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat.
 </p>
 
 <p>
-    Es ist wichtig, dass Sie sich bewusst sind, dass sowohl die Aktion Ihres Gegenübers, Ihre Punkte als auch die Punkte Ihres Gegenübers stets die Ergebnisse der vergangenen Periode darstellen. 
-    Sie werden so lange nichts über die Punkte oder die Aktion Ihres Gegenübers in der laufenden Periode erfahren, bis die Periode beendet ist.
+    Es ist wichtig, dass Sie sich bewusst sind, dass alle Informationen stets die Ergebnisse der vergangenen Periode darstellen. 
+    Sie werden so lange nichts über die Punkte oder die Aktion Ihres Mitspielers in der laufenden Periode erfahren, bis die Periode beendet ist.
 </p>
 
 <h5>
@@ -79,7 +79,7 @@
 </h5>
 
 <p>
-    In diesem Experiment verdienen Sie zunächst Punkte, die später bar in Euro ausgezahlt werden. 
+    In diesem Experiment verdienen Sie zunächst Punkte, die später bar ausgezahlt werden. 
     Für {{ conversion_rate }} Punkte werden Sie 1 Euro erhalten. 
     Ihre Punkte werden sich im Laufe des Experiments ansammeln. Ihre bisher verdienten Punkte werden Ihnen nach jedem Spiel angezeigt.     
 </p>
