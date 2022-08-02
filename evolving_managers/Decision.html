@@ -156,7 +156,7 @@ body {
     const numchoices = (maxaction - minaction) / stepsize + 1  
     var coordinates = new Array();
     for (let i = 0; i < numchoices; i++) {
-        coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, 1)));
+        coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
     }
 
     var coordinates2 = new Array();
@@ -319,7 +319,7 @@ body {
 
         var coordinates = new Array();
         for (let i = 0; i < numchoices; i++) {
-            coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, 1)));
+            coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
         }
         myChart.data.datasets[0].data = coordinates;
 
