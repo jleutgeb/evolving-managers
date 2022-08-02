@@ -143,6 +143,8 @@ body {
         var partner_period_payoff = js_vars.p1_period_payoff;
     }
 
+    var market_payoff = period_payoff + partner_period_payoff;
+
     var millisecondsleft = 0;
     const earnings = document.getElementById('earnings');
     const earnings_prev_period = document.getElementById('earnings_prev_period');
@@ -211,6 +213,13 @@ body {
                     borderDash: [5, 5],
                     hidden: !js_vars.joint_payoff_info,
                 },
+                {
+                    data: [{x:action, y:market_payoff}],
+                    backgroundColor: 'rgb(0, 0, 0)',
+                    pointRadius: 5,
+                    hidden: !js_vars.joint_payoff_info,
+                },
+
             ]
         },
         options: {
