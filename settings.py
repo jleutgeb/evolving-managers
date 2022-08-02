@@ -5,31 +5,16 @@ SESSION_CONFIGS = [
         name='evolving_managers',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
-        num_periods = 10,
+        num_periods = 15,
         mseconds_per_period = 4000,
-        gamma = 1,
+        gamma = 1.0,
         max_adjustment = 100, # if the previous period was too long the program will adjust by making the next period slightly shorter, but only up the the period length minus this value
-        initial_confidence = 1,
         simulation = False, # if simulated, the program will just play the best-reply
         conversion_rate = 1000, # how many points for 1 Euro
         initial_confidence_lower = 0.5, # lower & bound for initial confidence (uniform draw)
         initial_confidence_upper = 1.5, 
-        participation_fee = 5
-    ),
-    dict(
-        name='evolving_managers_sim',
-        app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
-        num_demo_participants = 2,
-        num_periods = 10,
-        mseconds_per_period = 4000,
-        gamma = 1,
-        max_adjustment = 100,
-        initial_confidence = 1,
-        simulation = True,
-        conversion_rate = 1000, # how many points for 1 Euro
-        initial_confidence_lower = 0.5, # lower & bound for initial confidence (uniform draw)
-        initial_confidence_upper = 1.5, 
-        participation_fee = 5
+        participation_fee = 5.0,
+        joint_payoff_info = False,
     ),
 ]
 

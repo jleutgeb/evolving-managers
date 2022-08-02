@@ -63,6 +63,7 @@ class Observations(ExtraModel):
     period_fitness = models.FloatField()
     timestamp = models.FloatField()
     expected_timestamp = models.FloatField()
+    joint_payoff_info = models.BooleanField()
 
 
 # PAGES
@@ -129,7 +130,9 @@ class Decision(Page):
             confidence = player.participant.confidence,
             partner_confidence = partner.participant.confidence,
             number_of_choices = 10**C.ACTION_DECIMAL_PLACES,
-            simulation = player.session.config['simulation']
+            simulation = player.session.config['simulation'],
+            gamma = player.group.gamma,
+            joint_payoff_info = player.session.config['joint_payoff_info'],
         )
 
     @staticmethod
@@ -372,8 +375,9 @@ def save_period(player):
         period_payoff = player.period_payoff,
         period_fitness = player.period_fitness,
         timestamp = player.timestamp,
-        expected_timestamp = player.group.expected_timestamp
-    )
+        expected_timestamp = player.group.expected_timestamp,
+        joint_payoff_info = player.session.config['joint_payoff_info']
+        )
 
 
 def custom_export(players):
@@ -391,7 +395,8 @@ def custom_export(players):
         'player.payoff',
         'player.fitness',
         'player.timestamp',
-        'player.expected_timestamp'
+        'player.expected_timestamp',
+        'player.joint_payoff_info'
     ]
     for p in players:
         pp = p.participant
@@ -410,5 +415,6 @@ def custom_export(players):
                 obs.period_payoff,
                 obs.period_fitness,
                 obs.timestamp,
-                obs.expected_timestamp
+                obs.expected_timestamp,
+                obs.joint_payoff_info
             ]

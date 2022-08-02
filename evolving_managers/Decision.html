@@ -159,6 +159,11 @@ body {
         coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, 1)));
     }
 
+    var coordinates2 = new Array();
+    for (let i = 0; i < numchoices; i++) {
+        coordinates2.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+    }
+
     const myChart = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -170,7 +175,7 @@ body {
                     ],
                     borderWidth: 1,
                     pointRadius: 0,
-                    showLine: true
+                    showLine: true,
                 },
                 {
                     data: [{x:action, y:0}],
@@ -193,7 +198,18 @@ body {
                     data: [{x:partner_action, y:partner_period_payoff}],
                     backgroundColor: 'rgb(0, 0, 255)',
                     pointRadius: 5,
-                    hidden: true,
+                    hidden: !js_vars.joint_payoff_info,
+                },
+                {
+                    data: coordinates2,
+                    borderColor: [
+                        'rgba(0, 0, 0, 1)'
+                    ],
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    showLine: true,
+                    borderDash: [5, 5],
+                    hidden: !js_vars.joint_payoff_info,
                 },
             ]
         },
@@ -322,6 +338,12 @@ body {
         var coordinates = new Array();
         coordinates.push(new coordinate(partner_action, partner_period_payoff));
         myChart.data.datasets[4].data = coordinates;
+
+        var coordinates = new Array();
+        for (let i = 0; i < numchoices; i++) {
+            coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+        }
+        myChart.data.datasets[5].data = coordinates;
 
         myChart.update();
 
