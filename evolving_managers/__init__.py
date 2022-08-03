@@ -12,9 +12,9 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 60
-    POPULATION_SIZE = 6
-    ACTION_DECIMAL_PLACES = 3
+    NUM_ROUNDS = 60 # number of supergames
+    POPULATION_SIZE = 6 # population size/matching silo size
+    ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
 
 
 class Subsession(BaseSubsession):
@@ -22,52 +22,54 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
-    gamma = models.FloatField()  # substitutability
-    p1_action = models.FloatField()
-    p2_action = models.FloatField()
-    p1_period_payoff = models.FloatField()
-    p2_period_payoff = models.FloatField()
+    gamma = models.FloatField()  # substitutability between firms' goods
+    p1_action = models.FloatField() # player 1's choice in the current period (q)
+    p2_action = models.FloatField() # player 2's choice in the current period (q)
+    p1_period_payoff = models.FloatField() # player 1's payoff (not profit) in the current period
+    p2_period_payoff = models.FloatField() # player 2's payoff (not profit) in the current period
     expected_timestamp = models.FloatField() # when is the period expected to happen
-    period = models.IntegerField(initial=0)
-    supergame_started = models.BooleanField(initial=False)
+    period = models.IntegerField(initial=0) # current period the group is in
+    supergame_started = models.BooleanField(initial=False) # track whether the supergame has started
 
 
 class Player(BasePlayer):
-    population = models.IntegerField()
-    confidence = models.FloatField()
-    action = models.FloatField()
-    period_payoff = models.FloatField()
-    round_payoff = models.FloatField(initial=0)
-    period_fitness = models.FloatField()
-    period = models.IntegerField(initial=0)
-    timestamp = models.FloatField() # in milliseconds
-    round_fitness = models.FloatField(initial=0)
-    ready = models.BooleanField(initial=False)
-    rank = models.IntegerField()
-    prob_selection = models.FloatField()
-    weight = models.FloatField()
-    prob_imitation_target = models.FloatField()
-    selected = models.BooleanField()
-    imitation_target = models.IntegerField()
+    population = models.IntegerField() # track population/matching silo
+    confidence = models.FloatField() # player's confidence (a)
+    action = models.FloatField() # current choice (q)
+    period_payoff = models.FloatField() # payoff in last period
+    round_payoff = models.FloatField(initial=0) # cumulative payoff in current supergame
+    period_fitness = models.FloatField() # fitness (firm profit) in last period
+    period = models.IntegerField(initial=0) # tracks current period for player
+    timestamp = models.FloatField() # timestamp in milliseconds
+    round_fitness = models.FloatField(initial=0) # cumulative fitness (firm profit) in current round
+    ready = models.BooleanField(initial=False) # track whether the player is ready for the supergame to start 
+    rank = models.IntegerField() # firm's fitness rank at the end of the supergame
+    prob_selection = models.FloatField() # probability that a firm selects the current manager out (i.e. draws a new confidence)
+    weight = models.FloatField() # imitation targets are weighted by distance to average fitness/firm profit
+    prob_imitation_target = models.FloatField() # probability to be imitated
+    selected = models.BooleanField() # 1 if this firm selects current manager out
+    imitation_target = models.IntegerField() # id of firm who is imitated
 
 
 class Observations(ExtraModel):
-    group = models.Link(Group)
-    player = models.Link(Player)
-    supergame = models.IntegerField()
-    period = models.IntegerField()
-    gamma = models.FloatField()
-    confidence = models.FloatField()
-    action = models.FloatField()
-    period_payoff = models.FloatField()
-    period_fitness = models.FloatField()
-    timestamp = models.FloatField()
-    expected_timestamp = models.FloatField()
-    joint_payoff_info = models.BooleanField()
+    group = models.Link(Group) # id of group
+    player = models.Link(Player) # id of player
+    supergame = models.IntegerField() # tracks current supergame
+    period = models.IntegerField() # tracks current period
+    gamma = models.FloatField() # treatment variable, substitutability between goods 
+    confidence = models.FloatField() # document player's confidence in current supergame
+    action = models.FloatField() # document player's action in current period
+    period_payoff = models.FloatField() # document player's payoff in current period
+    period_fitness = models.FloatField() # player's firm's profits in current period
+    timestamp = models.FloatField() # timestamp when the data arrived
+    expected_timestamp = models.FloatField() # timestamp when the data should have arrived (to track desyncs)
+    joint_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on joint payoffs
 
 
 # PAGES
 class Instructions(Page):
+    # on the instructions page send some data to the template: number of supergames, number of periods within each supergame, how long each period is (in seconds) and how many points convert to one Euro
+    # also, obviously, only display this page in the first supergame, and don't if we are running a simulation
     @staticmethod
     def vars_for_template(player: Player):
         return dict(
@@ -82,6 +84,7 @@ class Instructions(Page):
 
 
 class SetupWaitPage(WaitPage):
+    # on the waitpage wait for all players in a group, then calculate the payoff and fitness for the first period (which is not paid)
     @staticmethod
     def after_all_players_arrive(group: Group):
         players = group.get_players()
@@ -92,6 +95,7 @@ class SetupWaitPage(WaitPage):
             p.period_payoff = payoff_function('payoff', p, partner)
             p.period_fitness = payoff_function('fitness', p, partner)
 
+        # if we are running a simulation, let managers play Nash in all rounds
         if p.session.config['simulation'] == True:
             for p in players:
                 partner = p.get_others_in_group()[0]
@@ -101,29 +105,30 @@ class SetupWaitPage(WaitPage):
                 p.period_payoff = payoff_function('payoff', p, partner)
                 p.period_fitness = payoff_function('fitness', p, partner)
 
-        update_group_vars(group)
+        update_group_vars(group) # use this function to update all the group values after the player variables have all been set
         group.expected_timestamp = max([p.timestamp for p in players])
 
         for p in players:
-            save_period(p)
+            save_period(p) # save data for all players
 
 
 class Decision(Page):
     @staticmethod
     def vars_for_template(player: Player):
-
+        # if we are in the first period, it is not incentivized, so simply return a period payoff of zero. 
         if player.period == 0:
             period_payoff = float(0)
         else:
             period_payoff = round(player.period_payoff,1)
 
+        # whenever the page is (re)loaded, the current period payoff and the cumulative payoff up to that period are sent to the page
         return dict(
             round_payoff = round(player.round_payoff,1),
             period_payoff = period_payoff,
             period = player.group.period + 1
         )
 
-
+    # just some variables for javascript
     @staticmethod
     def js_vars(player: Player):
         partner = player.get_others_in_group()[0]
@@ -142,6 +147,18 @@ class Decision(Page):
             joint_payoff_info = player.session.config['joint_payoff_info'],
         )
 
+    # we have to work with group variables and not subject variables because of the live page.
+    # the logic is as follows: as soon as the page loads, the page sends a signal "ready" to the server.
+    # the first client to report "ready" doesn't yield a reply. the server has to wait for the second client first.
+    # the period can only start when both are ready.
+    # as soon as both members of a group have reported "ready", the server sends a signal to all clients in the group to start the next period
+    # this signal contains all information about the current period, actions, payoffs, when the clients should reply, etc.
+    # the clients start a period and return a reply after next_period_length milliseconds.
+    # now the server again has to wait for the second reply to come back to calculate payoffs.
+    # the server compares when the reply came and when the server expected the reply to come.
+    # there is a transmission and computational delay, also javascript isn't good at keeping a rhythm.
+    # to keep the rhythm the server adjusts the next period's length by the bias.
+    # there is a maximum negative adjustment time so if one period is delayed by a very long time, the next period is not of length zero.
     @staticmethod
     def live_method(player: Player, data):
         #print(data) # for debugging purposes
@@ -219,6 +236,7 @@ class Decision(Page):
                 for p in player.group.get_players():
                     save_period(p)
 
+                # adjust period length for last period's bias
                 dt = timestamp - data['expected']
                 next_period_length = max(period_length - player.session.config['max_adjustment'], period_length - dt)
 
@@ -237,6 +255,7 @@ class Decision(Page):
 
 
 class ResultsWaitPage(WaitPage):
+    # on this page convert the points from the previous supergame to Euro
     wait_for_all_groups = True
     def after_all_players_arrive(subsession):
         update_confidence(subsession)
@@ -257,7 +276,6 @@ class Results(Page):
         )
 
 
-#page_sequence = [SetupWaitPage, Decision, ResultsWaitPage]
 page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results]
 
 
@@ -328,6 +346,8 @@ def update_group_vars(group):
     group.p2_period_payoff = p2.period_payoff
 
 
+# the core function of the study
+# 
 def update_confidence(subsession):
     players = subsession.get_players()
     num_populations = max([p.population for p in players])
@@ -336,18 +356,21 @@ def update_confidence(subsession):
         population = [p for p in players if i == p.population]
         pop_fitness = [p.round_fitness for p in population]
         avg_pop_fitness = sum(pop_fitness)/len(pop_fitness)
+        # the chance to select one's manager increases linearly from the best-performing (in terms of fitness/profits) to the worst-performing firm
         for p in population:
             p.rank = sum([p.round_fitness < f for f in pop_fitness])
             p.weight = max(0, p.round_fitness - avg_pop_fitness)
         for r in range(len(population)):
             equal_rank = [p for p in population if p.rank == r]
             if len(equal_rank) > 1:
-                tiebreaker = list(range(len(equal_rank)))
+                tiebreaker = list(range(len(equal_rank))) # randomly break ties in ranks
                 random.shuffle(tiebreaker)
                 for e in range(len(equal_rank)):
                     equal_rank[e].rank = equal_rank[e].rank + tiebreaker[e]
         for p in population:
             p.prob_selection = p.rank/(len(population) - 1)
+        
+        # if a firm wants a new manager, they choose a target from firms beating the average in the population, weighted by the distance to the average.
         if all(p.weight == 0 for p in population):
             for p in population:
                 p.weight = 1
@@ -355,6 +378,7 @@ def update_confidence(subsession):
         for p in population:
             p.prob_imitation_target = p.weight/weightsum
         
+        # randomly draw if a firm selects their manager. if they do, add a random uniform error in the target's confidence
         for p in population:
             if random.random() > p.prob_selection:
                 p.selected = False
