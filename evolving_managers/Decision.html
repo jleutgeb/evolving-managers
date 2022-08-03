@@ -6,7 +6,7 @@
 
 <div class="interface_container">
     <div class="container_item container_item1">Punkte in diesem Spiel: <span id="earnings">{{ round_payoff }}</span></div>
-    <div class="container_item container_item4">Punkte in der letzten Periode: <span id="earnings_prev_period"></span></div>
+    <div class="container_item container_item4">Punkte in der letzten Periode: <span id="earnings_prev_period">{{ period_payoff }}</span></div>
 
     <div class="container_item container_item3"><span id="gameState">Warte auf den Server</span></div>
 
@@ -354,14 +354,18 @@ body {
         }
         myChart.data.datasets[5].data = coordinates;
 
+        var coordinates = new Array();
+        coordinates.push(new coordinate(action, period_payoff + partner_period_payoff));
+        myChart.data.datasets[6].data = coordinates;
+
         myChart.update();
 
         if (data.period == 0) {
             earnings_prev_period.innerHTML = 0;
             earnings.innerHTML = 0;
         } else {
-            earnings_prev_period.innerHTML = Math.round(period_payoff*10)/10;
-            earnings.innerHTML = Math.round(round_payoff*10)/10;
+            earnings_prev_period.innerHTML = (Math.round(period_payoff*10)/10).toString().replace(".", ",");
+            earnings.innerHTML = (Math.round(round_payoff*10)/10).toString().replace(".", ",");
         }
 
         var countdown_start = Date.now();

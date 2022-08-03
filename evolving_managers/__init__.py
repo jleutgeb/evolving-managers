@@ -111,8 +111,15 @@ class SetupWaitPage(WaitPage):
 class Decision(Page):
     @staticmethod
     def vars_for_template(player: Player):
+
+        if player.period == 0:
+            period_payoff = float(0)
+        else:
+            period_payoff = round(player.period_payoff,1)
+
         return dict(
             round_payoff = round(player.round_payoff,1),
+            period_payoff = period_payoff,
             period = player.group.period + 1
         )
 
