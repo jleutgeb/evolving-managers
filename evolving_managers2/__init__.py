@@ -10,7 +10,7 @@ Your app description
 """
 
 class C(BaseConstants):
-    NAME_IN_URL = 'evolving_managers'
+    NAME_IN_URL = 'evolving_managers2'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 15 # number of supergames
     POPULATION_SIZE = 6 # population size/matching silo size

@@ -10,7 +10,7 @@ Your app description
 """
 
 class C(BaseConstants):
-    NAME_IN_URL = 'evolving_managers'
+    NAME_IN_URL = 'evolving_managers4'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 15 # number of supergames
     POPULATION_SIZE = 6 # population size/matching silo size
@@ -144,7 +144,7 @@ class Decision(Page):
             number_of_choices = 10**C.ACTION_DECIMAL_PLACES,
             simulation = player.session.config['simulation'],
             gamma = player.group.gamma,
-            joint_payoff_info = False,
+            joint_payoff_info = True,
         )
 
     # we have to work with group variables and not subject variables because of the live page.
@@ -407,7 +407,7 @@ def save_period(player):
         period_fitness = player.period_fitness,
         timestamp = player.timestamp,
         expected_timestamp = player.group.expected_timestamp,
-        joint_payoff_info = False
+        joint_payoff_info = True
         )
 
 
