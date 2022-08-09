@@ -78,6 +78,7 @@ class Instructions(Page):
             period_length = round(player.session.config['mseconds_per_period']/1000),
             conversion_rate = player.session.config['conversion_rate'],
             joint_payoff_info = player.session.config['joint_payoff_info'],
+            participation_fee = player.session.config['participation_fee'],
             )
 
     def is_displayed(player):

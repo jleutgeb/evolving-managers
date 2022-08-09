@@ -13,7 +13,7 @@ SESSION_CONFIGS = [
         conversion_rate = 1000, # how many points for 1 Euro
         initial_confidence_lower = 0.5, # lower & bound for initial confidence (uniform draw)
         initial_confidence_upper = 1.5, 
-        participation_fee = 5.0,
+        participation_fee = 6.0,
         joint_payoff_info = False,
     ),
 ]
