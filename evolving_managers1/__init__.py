@@ -76,7 +76,8 @@ class Instructions(Page):
             num_rounds = C.NUM_ROUNDS,
             num_periods = player.session.config['num_periods'],
             period_length = round(player.session.config['mseconds_per_period']/1000),
-            conversion_rate = player.session.config['conversion_rate']
+            conversion_rate = player.session.config['conversion_rate'],
+            participation_fee = player.session.config['participation_fee']
             )
 
     def is_displayed(player):
