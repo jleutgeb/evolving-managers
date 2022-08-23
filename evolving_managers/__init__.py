@@ -417,7 +417,8 @@ def custom_export(players):
     yield [
         'session.code', 
         'participant.id', 
-        'participant.code', 
+        'participant.code',
+        'participant.population',
         'group.id',
         'player.id',
         'player.supergame',
@@ -438,6 +439,7 @@ def custom_export(players):
                 pp.session.code,
                 pp.id_in_session,
                 pp.code,
+                pp.population,
                 p.group.id_in_subsession,
                 p.id_in_group,
                 obs.supergame,
