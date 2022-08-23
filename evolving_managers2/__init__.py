@@ -12,7 +12,7 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers2'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 15 # number of supergames
+    NUM_ROUNDS = 2 # number of supergames
     POPULATION_SIZE = 6 # population size/matching silo size
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
 
@@ -284,7 +284,7 @@ def creating_session(subsession: Subsession):
     # in round 1, assign a player to a population and draw an initial a
     if subsession.round_number == 1:
         for p in subsession.get_players():
-            p.participant.population = (p.participant.id_in_session - 1) // C.POPULATION_SIZE + 1
+            #p.participant.population = (p.participant.id_in_session - 1) // C.POPULATION_SIZE + 1
             p.participant.total_payoff = 0
     
     # shuffle the matching within each population every round (and assign initial confidence)
@@ -416,6 +416,7 @@ def custom_export(players):
         'session.code', 
         'participant.id', 
         'participant.code', 
+        'participant.population',
         'group.id',
         'player.id',
         'player.supergame',
@@ -436,6 +437,7 @@ def custom_export(players):
                 pp.session.code,
                 pp.id_in_session,
                 pp.code,
+                pp.population,
                 p.group.id_in_subsession,
                 p.id_in_group,
                 obs.supergame,

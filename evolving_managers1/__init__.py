@@ -12,7 +12,7 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers1'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 15 # number of supergames
+    NUM_ROUNDS = 2 # number of supergames
     POPULATION_SIZE = 6 # population size/matching silo size
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
 
@@ -417,6 +417,7 @@ def custom_export(players):
         'session.code', 
         'participant.id', 
         'participant.code', 
+        'participant.population',
         'group.id',
         'player.id',
         'player.supergame',
@@ -437,6 +438,7 @@ def custom_export(players):
                 pp.session.code,
                 pp.id_in_session,
                 pp.code,
+                pp.population,
                 p.group.id_in_subsession,
                 p.id_in_group,
                 obs.supergame,
