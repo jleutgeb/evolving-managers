@@ -21,7 +21,11 @@ ROOMS = [
         name = 'TU_LAB',
         display_name = 'TU Lab',
         participant_label_file = '_rooms/TU_lab.txt',
-        use_secure_urls = True,
+        use_secure_urls = False,
+    ),
+    dict(
+        name = 'TU_LAB_noIDs',
+        display_name = 'TU Lab no IDs',
     ),
 ]
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
