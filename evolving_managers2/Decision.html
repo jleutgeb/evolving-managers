@@ -200,7 +200,9 @@ body {
                     data: [{x:partner_action, y:partner_period_payoff}],
                     backgroundColor: 'rgb(0, 0, 255)',
                     pointRadius: 5,
-                    hidden: !js_vars.joint_payoff_info,
+                    // for now: hide partner payoff
+                    // hidden: !js_vars.joint_payoff_info,
+                    hidden: true,
                 },
                 {
                     data: coordinates2,

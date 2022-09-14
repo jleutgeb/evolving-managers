@@ -12,9 +12,11 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers3'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 15 # number of supergames
-    POPULATION_SIZE = 6 # population size/matching silo size
+    NUM_ROUNDS = 20 # number of supergames
+    POPULATION_SIZE = 8 # population size/matching silo size
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
+    GAMMA = 1.0 # substitutability
+    JOINT_PAYOFF_INFO = True
 
 
 class Subsession(BaseSubsession):
@@ -144,7 +146,7 @@ class Decision(Page):
             number_of_choices = 10**C.ACTION_DECIMAL_PLACES,
             simulation = player.session.config['simulation'],
             gamma = player.group.gamma,
-            joint_payoff_info = False,
+            joint_payoff_info = C.JOINT_PAYOFF_INFO,
         )
 
     # we have to work with group variables and not subject variables because of the live page.
@@ -311,7 +313,7 @@ def creating_session(subsession: Subsession):
 
     # set the gamma parameter for all groups
     for g in subsession.get_groups():
-        g.gamma = 0.5
+        g.gamma = C.GAMMA
 
     # draw player's initial action
     for p in subsession.get_players():
@@ -390,6 +392,13 @@ def update_confidence(subsession):
                 next_confidence = imitation_target.confidence + random.uniform(-0.1, 0.1)
             p.participant.confidence = next_confidence
         
+        # if we are in the last game, reset the participant confidence for the next 
+        if subsession.round_number == C.NUM_ROUNDS:
+            confidence = draw_confidence(subsession)
+            for p in population:
+                p.participant.confidence = confidence
+
+
         i += 1
 
 
@@ -407,7 +416,7 @@ def save_period(player):
         period_fitness = player.period_fitness,
         timestamp = player.timestamp,
         expected_timestamp = player.group.expected_timestamp,
-        joint_payoff_info = False
+        joint_payoff_info = C.JOINT_PAYOFF_INFO
         )
 
 
