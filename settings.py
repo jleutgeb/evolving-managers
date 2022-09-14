@@ -3,9 +3,9 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='evolving_managers',
-        app_sequence=['consent', 'evolving_managers1', 'evolving_managers2', 'evolving_managers3', 'evolving_managers4', 'questionnaire', 'payment_info'],
+        app_sequence=['consent', 'evolving_managers1', 'evolving_managers2', 'evolving_managers3', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
-        num_periods = 15,
+        num_periods = 8,
         mseconds_per_period = 4000,
         max_adjustment = 100, # if the previous period was too long the program will adjust by making the next period slightly shorter, but only up the the period length minus this value
         simulation = False, # if simulated, the program will just play the best-reply
