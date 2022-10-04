@@ -3,6 +3,7 @@ from os import stat
 from otree.api import *
 import time
 import random
+from math import ceil
 
 
 doc = """
@@ -276,6 +277,11 @@ class Results(Page):
             round_payoff = round(player.round_payoff,1),
             total_payoff = round(player.participant.total_payoff,1),
         )
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        if player.round_number == C.NUM_ROUNDS:
+            player.participant.payoff = ceil(player.participant.payoff * 2) / 2
 
 
 page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results]

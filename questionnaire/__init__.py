@@ -41,9 +41,9 @@ class Player(BasePlayer):
 class Questionnaire(Page):
     form_model = "player"
     form_fields = ['gender', 'age', 'field', 'semesters', 'strategy', 'comments']
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        player.participant.payoff = ceil(player.participant.payoff * 2) / 2
+    # @staticmethod
+    # def before_next_page(player: Player, timeout_happened):
+    #     player.participant.payoff = ceil(player.participant.payoff * 2) / 2
 
 
 page_sequence = [Questionnaire]
