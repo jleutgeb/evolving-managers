@@ -87,32 +87,34 @@ class Instructions(Page):
 
 
 class SetupWaitPage(WaitPage):
-    # on the waitpage wait for all players in a group, then calculate the payoff and fitness for the first period (which is not paid)
+    # on the waitpage wait for all players in the subsession, then calculate the payoff and fitness for the first period (which is not paid)
+    wait_for_all_groups = True
     @staticmethod
-    def after_all_players_arrive(group: Group):
-        players = group.get_players()
-        for p in players:
-            p.timestamp = time.time() * 1000
-            p.confidence = p.participant.confidence
-            partner = p.get_others_in_group()[0]
-            p.period_payoff = payoff_function('payoff', p, partner)
-            p.period_fitness = payoff_function('fitness', p, partner)
-
-        # if we are running a simulation, let managers play Nash in all rounds
-        if p.session.config['simulation'] == True:
+    def after_all_players_arrive(subsession: Subsession):
+        for group in subsession.get_groups():
+            players = group.get_players()
             for p in players:
-                partner = p.get_others_in_group()[0]
-                p.action = (2*p.confidence - p.group.gamma*partner.confidence)/(4-p.group.gamma*p.group.gamma)
-            for p in players:
+                p.timestamp = time.time() * 1000
+                p.confidence = p.participant.confidence
                 partner = p.get_others_in_group()[0]
                 p.period_payoff = payoff_function('payoff', p, partner)
                 p.period_fitness = payoff_function('fitness', p, partner)
 
-        update_group_vars(group) # use this function to update all the group values after the player variables have all been set
-        group.expected_timestamp = max([p.timestamp for p in players])
+            # if we are running a simulation, let managers play Nash in all rounds
+            if p.session.config['simulation'] == True:
+                for p in players:
+                    partner = p.get_others_in_group()[0]
+                    p.action = (2*p.confidence - p.group.gamma*partner.confidence)/(4-p.group.gamma*p.group.gamma)
+                for p in players:
+                    partner = p.get_others_in_group()[0]
+                    p.period_payoff = payoff_function('payoff', p, partner)
+                    p.period_fitness = payoff_function('fitness', p, partner)
 
-        for p in players:
-            save_period(p) # save data for all players
+            update_group_vars(group) # use this function to update all the group values after the player variables have all been set
+            group.expected_timestamp = max([p.timestamp for p in players])
+
+            for p in players:
+                save_period(p) # save data for all players
 
 
 class Decision(Page):
