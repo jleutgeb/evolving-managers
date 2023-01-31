@@ -1,0 +1,5 @@
+start_supergame,end_supergame,periods,treatment,gamma,show_joint_payoffs,show_relative_payoffs
+1,40,8,Gamma0,0.0,False,False
+41,80,8,Gamma1,1.0,False,False
+81,120,8,Gamma1Info,1.0,True,False
+121,160,8,Gamma1InfoRel,1.0,True,True
