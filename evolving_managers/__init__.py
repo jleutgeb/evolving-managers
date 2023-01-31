@@ -3,6 +3,7 @@ from os import stat
 from otree.api import *
 import time
 import random
+import csv
 
 
 doc = """
@@ -13,8 +14,8 @@ class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 60 # number of supergames
-    POPULATION_SIZE = 6 # population size/matching silo size
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
+    NOISE_RANGE = 0.1 # range for noise when imitating [-NOISE_RANGE,NOISE_RANGE]
 
 
 class Subsession(BaseSubsession):
@@ -30,6 +31,8 @@ class Group(BaseGroup):
     expected_timestamp = models.FloatField() # when is the period expected to happen
     period = models.IntegerField(initial=0) # current period the group is in
     supergame_started = models.BooleanField(initial=False) # track whether the supergame has started
+    num_periods = models.IntegerField() # how many periods are in a supergame
+    initial_population_confidence = models.FloatField() # the population's initial confidence
 
 
 class Player(BasePlayer):
@@ -74,7 +77,7 @@ class Instructions(Page):
     def vars_for_template(player: Player):
         return dict(
             num_rounds = C.NUM_ROUNDS,
-            num_periods = player.session.config['num_periods'],
+            num_periods = player.group.num_periods,
             period_length = round(player.session.config['mseconds_per_period']/1000),
             conversion_rate = player.session.config['conversion_rate'],
             joint_payoff_info = player.session.config['joint_payoff_info'],
@@ -135,7 +138,7 @@ class Decision(Page):
     def js_vars(player: Player):
         partner = player.get_others_in_group()[0]
         return dict(
-            num_periods = player.session.config['num_periods'],
+            num_periods = player.group.num_periods,
             p1_action = player.group.p1_action,
             p2_action = player.group.p2_action,
             p1_period_payoff = player.group.p1_period_payoff,
@@ -166,7 +169,7 @@ class Decision(Page):
         #print(data) # for debugging purposes
         timestamp = time.time() * 1000 # timestamp in milliseconds
         period_length = player.session.config['mseconds_per_period']
-        num_periods = player.session.config['num_periods']
+        num_periods = player.group.num_periods
         partner = player.get_others_in_group()[0]
         p1 = player.group.get_player_by_id(1)
         p2 = player.group.get_player_by_id(2)
@@ -283,10 +286,30 @@ page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results
 
 # FUNCTIONS
 def creating_session(subsession: Subsession):
-    # in round 1, assign a player to a population and draw an initial a
+    # read the config file
+    with open('config/demo.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        configs = [row for row in reader]
+    
+    # adjust data formats
+    for row in configs:
+        row['start_supergame'] = int(row['start_supergame'])
+        row['end_supergame'] = int(row['end_supergame'])
+        row['num_periods'] = int(row['num_periods'])
+        row['gamma'] = float(row['gamma'])
+        row['show_joint_payoffs'] = row['show_joint_payoffs'] == 'True'
+        row['show_relative_payoffs'] = row['show_relative_payoffs'] == 'True'
+        row['population_size'] = int(row['population_size'])
+        row['initial_confidence_lower'] = float(row['initial_confidence_lower'])
+        row['initial_confidence_upper'] = float(row['initial_confidence_upper'])
+    
+    current_config = [config for config in configs if config['start_supergame'] <= subsession.round_number and config['end_supergame'] >= subsession.round_number][0]
+    treatment_change_round = [config['start_supergame'] for config in configs]
+
+    # in round 1, assign a player to a population
     if subsession.round_number == 1:
         for p in subsession.get_players():
-            p.participant.population = (p.participant.id_in_session - 1) // C.POPULATION_SIZE + 1
+            p.participant.population = (p.participant.id_in_session - 1) // current_config['population_size'] + 1
             p.participant.total_payoff = 0
     
     # shuffle the matching within each population every round (and assign initial confidence)
@@ -296,10 +319,17 @@ def creating_session(subsession: Subsession):
     num_populations = max([p.population for p in players])
     new_group_matrix = []
     i = 1
+    # draw random order for populations' initial confidence
+    order = random.random() > 0.5
     while i <= num_populations:
         population = [p for p in players if p.population == i]
-        if subsession.round_number == 1:
-            confidence = draw_confidence(subsession)
+        # if the current round is the first round in a treatment (when doing within-subjects treatments)
+        # assign initial confidence
+        if subsession.round_number in treatment_change_round:
+            if order % 2 == i % 2:
+                confidence = current_config['initial_confidence_lower']
+            else:
+                confidence = current_config['initial_confidence_upper']
             for p in population:
                 p.participant.confidence = confidence
         random.shuffle(population)
@@ -309,21 +339,23 @@ def creating_session(subsession: Subsession):
             new_group_matrix.append(new_group)
             j += 2
         i += 1
+    
+    for p in players:
+        p.group.initial_population_confidence = p.participant.confidence
+        if subsession.round_number in treatment_change_round:
+            p.confidence = p.participant.confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
+        
     subsession.set_group_matrix(new_group_matrix)
 
-    # set the gamma parameter for all groups
+    # set parameters for all groups
     for g in subsession.get_groups():
-        g.gamma = subsession.session.config['gamma']
+        g.gamma = current_config['gamma']
+        g.num_periods = current_config['num_periods']
 
     # draw player's initial action
     for p in subsession.get_players():
         p.population = p.participant.population
         p.action = draw_initial_action()
-
-
-def draw_confidence(subsession):
-    confidence = random.uniform(subsession.session.config['initial_confidence_lower'], subsession.session.config['initial_confidence_upper'])
-    return confidence
 
 
 def draw_initial_action():
@@ -349,7 +381,6 @@ def update_group_vars(group):
 
 
 # the core function of the study
-# 
 def update_confidence(subsession):
     players = subsession.get_players()
     num_populations = max([p.population for p in players])
@@ -389,7 +420,7 @@ def update_confidence(subsession):
                 p.selected = True
                 imitation_target = random.choices(population, [pl.prob_imitation_target for pl in population])[0]
                 p.imitation_target = imitation_target.participant.id_in_session
-                next_confidence = imitation_target.confidence + random.uniform(-0.1, 0.1)
+                next_confidence = imitation_target.confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
             p.participant.confidence = next_confidence
         
         i += 1
