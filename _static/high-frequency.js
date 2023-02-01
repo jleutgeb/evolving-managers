@@ -28,6 +28,7 @@ else if (js_vars.id === 2) {
 }
 
 var market_payoff = period_payoff + partner_period_payoff;
+var payoff_difference = Math.abs(period_payoff - partner_period_payoff);
 
 var millisecondsleft = 0;
 const earnings = document.getElementById('earnings');
@@ -40,14 +41,21 @@ const minaction = 0;
 const maxaction = 1;
 const stepsize = 0.01; // used to draw the counterfactual payoff
 const numchoices = (maxaction - minaction) / stepsize + 1  
-var coordinates = new Array();
+var own_payoff_coordinates = new Array();
 for (let i = 0; i < numchoices; i++) {
-    coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
+    own_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
 }
 
-var coordinates2 = new Array();
+var joint_payoff_coordinates = new Array();
 for (let i = 0; i < numchoices; i++) {
-    coordinates2.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+    joint_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+}
+
+var relative_payoff_coordinates = new Array();
+for (let i = 0; i < numchoices; i++) {
+    relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), -Math.abs(payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) - payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma))));
+    //relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) - payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+    //relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
 }
 
 const myChart = new Chart(ctx, {
@@ -55,7 +63,7 @@ const myChart = new Chart(ctx, {
     data: {
         datasets: [
             {
-                data: coordinates,
+                data: own_payoff_coordinates,
                 borderColor: [
                     'rgba(0, 0, 0, 1)'
                 ],
@@ -87,7 +95,13 @@ const myChart = new Chart(ctx, {
                 hidden: !js_vars.joint_payoff_info,
             },
             {
-                data: coordinates2,
+                data: [{x:action, y:market_payoff}],
+                backgroundColor: 'rgb(0, 0, 255)',
+                pointRadius: 5,
+                hidden: true,
+            },
+            {
+                data: joint_payoff_coordinates,
                 borderColor: [
                     'rgba(0, 0, 0, 1)'
                 ],
@@ -98,12 +112,22 @@ const myChart = new Chart(ctx, {
                 hidden: !js_vars.joint_payoff_info,
             },
             {
-                data: [{x:action, y:market_payoff}],
+                data: [{x:action, y:payoff_difference}],
                 backgroundColor: 'rgb(0, 0, 0)',
                 pointRadius: 5,
-                hidden: !js_vars.joint_payoff_info,
+                hidden: true,
             },
-
+            {
+                data: relative_payoff_coordinates,
+                borderColor: [
+                    'rgba(0, 0, 0, 1)'
+                ],
+                borderWidth: 1,
+                pointRadius: 0,
+                showLine: true,
+                borderDash: [1, 3],
+                hidden: !js_vars.relative_payoff_info,
+            },
         ]
     },
     options: {
@@ -150,6 +174,7 @@ const myChart = new Chart(ctx, {
             },
             y: {
                 beginAtZero: true,
+                suggestedMin: -0.1 * 100,
                 suggestedMax: 0.5 * 100,
             }
         }
@@ -210,37 +235,49 @@ function liveRecv(data) {
         round_payoff = data.p2_round_payoff;
     }
 
-    var coordinates = new Array();
+    var own_payoff_coordinates = new Array();
     for (let i = 0; i < numchoices; i++) {
-        coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
+        own_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma)));
     }
-    myChart.data.datasets[0].data = coordinates;
+    myChart.data.datasets[0].data = own_payoff_coordinates;
 
-    var coordinates = new Array();
-    coordinates.push(new coordinate(action, 0));
-    myChart.data.datasets[1].data = coordinates;
+    var own_action = new Array();
+    own_action.push(new coordinate(action, 0));
+    myChart.data.datasets[1].data = own_action;
 
-    var coordinates = new Array();
-    coordinates.push(new coordinate(partner_action, 0));
-    myChart.data.datasets[2].data = coordinates;
+    var partners_action = new Array();
+    partners_action.push(new coordinate(partner_action, 0));
+    myChart.data.datasets[2].data = partners_action;
 
-    var coordinates = new Array();
-    coordinates.push(new coordinate(action, period_payoff));
-    myChart.data.datasets[3].data = coordinates;
+    var own_payoff = new Array();
+    own_payoff.push(new coordinate(action, period_payoff));
+    myChart.data.datasets[3].data = own_payoff;
 
-    var coordinates = new Array();
-    coordinates.push(new coordinate(partner_action, partner_period_payoff));
-    myChart.data.datasets[4].data = coordinates;
+    var partners_payoff = new Array();
+    partners_payoff.push(new coordinate(partner_action, partner_period_payoff));
+    myChart.data.datasets[4].data = partners_payoff;
 
-    var coordinates = new Array();
+    var joint_payoff = new Array();
+    joint_payoff.push(new coordinate(action, period_payoff + partner_period_payoff));
+    myChart.data.datasets[5].data = joint_payoff;
+
+    var joint_payoff_coordinates = new Array();
     for (let i = 0; i < numchoices; i++) {
-        coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+        joint_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) + payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
     }
-    myChart.data.datasets[5].data = coordinates;
+    myChart.data.datasets[6].data = joint_payoff_coordinates;
 
-    var coordinates = new Array();
-    coordinates.push(new coordinate(action, period_payoff + partner_period_payoff));
-    myChart.data.datasets[6].data = coordinates;
+    var payoff_difference = new Array();
+    payoff_difference.push(new coordinate(action, Math.abs(period_payoff - partner_period_payoff)));
+    myChart.data.datasets[7].data = payoff_difference;
+
+    var relative_payoff_coordinates = new Array();
+    for (let i = 0; i < numchoices; i++) {
+        relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), -Math.abs(payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) - payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma))));
+        //relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.confidence, i/(numchoices-1), partner_action, js_vars.gamma) - payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+        //relative_payoff_coordinates.push(new coordinate(i/(numchoices-1), payoff(js_vars.partner_confidence, partner_action, i/(numchoices-1), js_vars.gamma)));
+    }
+    myChart.data.datasets[8].data = relative_payoff_coordinates;
 
     myChart.update();
 

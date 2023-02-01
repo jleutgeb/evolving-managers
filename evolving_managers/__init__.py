@@ -13,9 +13,11 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 60 # number of supergames
+    NUM_ROUNDS = 4 # number of supergames
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
     NOISE_RANGE = 0.1 # range for noise when imitating [-NOISE_RANGE,NOISE_RANGE]
+    MIN_CONFIDENCE = 0.5
+    MAX_CONFIDENCE = 2.0
 
 
 class Subsession(BaseSubsession):
@@ -32,7 +34,6 @@ class Group(BaseGroup):
     period = models.IntegerField(initial=0) # current period the group is in
     supergame_started = models.BooleanField(initial=False) # track whether the supergame has started
     num_periods = models.IntegerField() # how many periods are in a supergame
-    initial_population_confidence = models.FloatField() # the population's initial confidence
 
 
 class Player(BasePlayer):
@@ -52,6 +53,9 @@ class Player(BasePlayer):
     prob_imitation_target = models.FloatField() # probability to be imitated
     selected = models.BooleanField() # 1 if this firm selects current manager out
     imitation_target = models.IntegerField() # id of firm who is imitated
+    initial_population_confidence = models.FloatField() # the population's initial confidence
+    joint_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on joint payoffs
+    relative_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on relative payoffs
 
 
 class Observations(ExtraModel):
@@ -67,6 +71,7 @@ class Observations(ExtraModel):
     timestamp = models.FloatField() # timestamp when the data arrived
     expected_timestamp = models.FloatField() # timestamp when the data should have arrived (to track desyncs)
     joint_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on joint payoffs
+    relative_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on relative payoffs
 
 
 # PAGES
@@ -80,7 +85,8 @@ class Instructions(Page):
             num_periods = player.group.num_periods,
             period_length = round(player.session.config['mseconds_per_period']/1000),
             conversion_rate = player.session.config['conversion_rate'],
-            joint_payoff_info = player.session.config['joint_payoff_info'],
+            joint_payoff_info = player.joint_payoff_info,
+            relative_payoff_info = player.relative_payoff_info,
             participation_fee = player.session.config['participation_fee'],
             )
 
@@ -95,7 +101,6 @@ class SetupWaitPage(WaitPage):
         players = group.get_players()
         for p in players:
             p.timestamp = time.time() * 1000
-            p.confidence = p.participant.confidence
             partner = p.get_others_in_group()[0]
             p.period_payoff = payoff_function('payoff', p, partner)
             p.period_fitness = payoff_function('fitness', p, partner)
@@ -144,12 +149,13 @@ class Decision(Page):
             p1_period_payoff = player.group.p1_period_payoff,
             p2_period_payoff = player.group.p2_period_payoff,
             id = player.id_in_group,
-            confidence = player.participant.confidence,
-            partner_confidence = partner.participant.confidence,
+            confidence = player.confidence,
+            partner_confidence = partner.confidence,
             number_of_choices = 10**C.ACTION_DECIMAL_PLACES,
             simulation = player.session.config['simulation'],
             gamma = player.group.gamma,
-            joint_payoff_info = player.session.config['joint_payoff_info'],
+            joint_payoff_info = player.joint_payoff_info,
+            relative_payoff_info = player.relative_payoff_info,
         )
 
     # we have to work with group variables and not subject variables because of the live page.
@@ -286,8 +292,8 @@ page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results
 
 # FUNCTIONS
 def creating_session(subsession: Subsession):
-    # read the config file
-    with open('config/demo.csv', newline='') as csvfile:
+    # read the config file first read the config
+    with open('evolving_managers/config/demo.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         configs = [row for row in reader]
     
@@ -297,14 +303,19 @@ def creating_session(subsession: Subsession):
         row['end_supergame'] = int(row['end_supergame'])
         row['num_periods'] = int(row['num_periods'])
         row['gamma'] = float(row['gamma'])
-        row['show_joint_payoffs'] = row['show_joint_payoffs'] == 'True'
-        row['show_relative_payoffs'] = row['show_relative_payoffs'] == 'True'
+        row['joint_payoff_info'] = row['joint_payoff_info'] == 'True'
+        row['relative_payoff_info'] = row['relative_payoff_info'] == 'True'
         row['population_size'] = int(row['population_size'])
         row['initial_confidence_lower'] = float(row['initial_confidence_lower'])
         row['initial_confidence_upper'] = float(row['initial_confidence_upper'])
-    
+
+    # save it in a participant variable in case we ever need it
+    if subsession.round_number == 1:
+        for p in subsession.get_players():
+            p.participant.configs = configs
+
+    # grab the current config
     current_config = [config for config in configs if config['start_supergame'] <= subsession.round_number and config['end_supergame'] >= subsession.round_number][0]
-    treatment_change_round = [config['start_supergame'] for config in configs]
 
     # in round 1, assign a player to a population
     if subsession.round_number == 1:
@@ -312,7 +323,7 @@ def creating_session(subsession: Subsession):
             p.participant.population = (p.participant.id_in_session - 1) // current_config['population_size'] + 1
             p.participant.total_payoff = 0
     
-    # shuffle the matching within each population every round (and assign initial confidence)
+    # shuffle the matching within each population every round and assign initial confidence
     players = subsession.get_players()
     for p in players:
         p.population = p.participant.population
@@ -321,30 +332,31 @@ def creating_session(subsession: Subsession):
     i = 1
     # draw random order for populations' initial confidence
     order = random.random() > 0.5
+    
     while i <= num_populations:
         population = [p for p in players if p.population == i]
         # if the current round is the first round in a treatment (when doing within-subjects treatments)
-        # assign initial confidence
-        if subsession.round_number in treatment_change_round:
+        # assign initial confidence, else grab confidence from first round of current treatment
+        # alternate populations' initial confidence
+        if subsession.round_number == current_config['start_supergame']:
             if order % 2 == i % 2:
                 confidence = current_config['initial_confidence_lower']
             else:
                 confidence = current_config['initial_confidence_upper']
             for p in population:
-                p.participant.confidence = confidence
+                p.confidence = confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
+                p.initial_population_confidence = confidence
+        else:
+            for p in population:
+                p.initial_population_confidence = p.in_round(current_config['start_supergame']).initial_population_confidence
+
         random.shuffle(population)
         j = 0
         while j < len(population):
             new_group = [population[j], population[j+1]]
             new_group_matrix.append(new_group)
             j += 2
-        i += 1
-    
-    for p in players:
-        p.group.initial_population_confidence = p.participant.confidence
-        if subsession.round_number in treatment_change_round:
-            p.confidence = p.participant.confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
-        
+        i += 1        
     subsession.set_group_matrix(new_group_matrix)
 
     # set parameters for all groups
@@ -352,10 +364,12 @@ def creating_session(subsession: Subsession):
         g.gamma = current_config['gamma']
         g.num_periods = current_config['num_periods']
 
-    # draw player's initial action
+    # draw player's initial action and assign treatment variables
     for p in subsession.get_players():
         p.population = p.participant.population
         p.action = draw_initial_action()
+        p.joint_payoff_info = current_config['joint_payoff_info']
+        p.relative_payoff_info = current_config['relative_payoff_info']
 
 
 def draw_initial_action():
@@ -421,10 +435,14 @@ def update_confidence(subsession):
                 imitation_target = random.choices(population, [pl.prob_imitation_target for pl in population])[0]
                 p.imitation_target = imitation_target.participant.id_in_session
                 next_confidence = imitation_target.confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
-            p.participant.confidence = next_confidence
+                if next_confidence > C.MAX_CONFIDENCE:
+                    next_confidence = C.MAX_CONFIDENCE
+                elif next_confidence < C.MIN_CONFIDENCE:
+                    next_confidence = C.MAX_CONFIDENCE
+            if subsession.round_number < C.NUM_ROUNDS:
+                p.in_round(subsession.round_number+1).confidence = next_confidence
         
         i += 1
-
 
 
 def save_period(player):
@@ -440,7 +458,7 @@ def save_period(player):
         period_fitness = player.period_fitness,
         timestamp = player.timestamp,
         expected_timestamp = player.group.expected_timestamp,
-        joint_payoff_info = player.session.config['joint_payoff_info']
+        joint_payoff_info = player.joint_payoff_info
         )
 
 
