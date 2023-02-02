@@ -1,5 +1,5 @@
-start_supergame,end_supergame,num_periods,treatment,gamma,joint_payoff_info,relative_payoff_info,population_size,initial_confidence_lower,initial_confidence_upper
-1,1,30,Gamma0,1.0,True,True,8,1,1
-2,2,8,Gamma1,1.0,False,False,8,0.6,1.6
-3,3,8,Gamma1Info,1.0,True,False,8,0.6,1.6
-4,4,8,Gamma1InfoRel,1.0,True,True,8,0.6,1.6
+start_supergame,end_supergame,num_periods,treatment,gamma,joint_payoff_info,relative_payoff_info,population_size,initial_confidence_lower,initial_confidence_upper,mseconds_per_period,max_adjustment
+1,1,30,Gamma0,1.0,True,True,8,1,1,4000,100
+2,2,8,Gamma1,1.0,False,False,8,0.6,1.6,4000,100
+3,3,8,Gamma1Info,1.0,True,False,8,0.6,1.6,4000,100
+4,4,8,Gamma1InfoRel,1.0,True,True,8,0.6,1.6,4000,100

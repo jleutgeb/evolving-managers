@@ -56,7 +56,9 @@ class Player(BasePlayer):
     initial_population_confidence = models.FloatField() # the population's initial confidence
     joint_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on joint payoffs
     relative_payoff_info = models.BooleanField() # treatment variable, whether there is additional information on relative payoffs
-
+    mseconds_per_period = models.IntegerField() # how many ms every period has
+    max_adjustment = models.IntegerField() # if the previous period was too long the program will adjust by making the next period slightly shorter, but only up the the period length minus this value
+    
 
 class Observations(ExtraModel):
     group = models.Link(Group) # id of group
@@ -80,18 +82,22 @@ class Instructions(Page):
     # also, obviously, only display this page in the first supergame, and don't if we are running a simulation
     @staticmethod
     def vars_for_template(player: Player):
+        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         return dict(
             num_rounds = C.NUM_ROUNDS,
             num_periods = player.group.num_periods,
-            period_length = round(player.session.config['mseconds_per_period']/1000),
+            period_length = round(player.mseconds_per_period/1000),
             conversion_rate = player.session.config['conversion_rate'],
             joint_payoff_info = player.joint_payoff_info,
             relative_payoff_info = player.relative_payoff_info,
             participation_fee = player.session.config['participation_fee'],
+            treatment = current_config['treatment']
             )
 
     def is_displayed(player):
-        return player.session.config['simulation'] == False and player.subsession.round_number == 1
+        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
+        # only show instructions page at the beginning of a new supergame and if we are not simulating
+        return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame']
 
 
 class SetupWaitPage(WaitPage):
@@ -174,7 +180,7 @@ class Decision(Page):
     def live_method(player: Player, data):
         #print(data) # for debugging purposes
         timestamp = time.time() * 1000 # timestamp in milliseconds
-        period_length = player.session.config['mseconds_per_period']
+        period_length = player.mseconds_per_period
         num_periods = player.group.num_periods
         partner = player.get_others_in_group()[0]
         p1 = player.group.get_player_by_id(1)
@@ -249,7 +255,7 @@ class Decision(Page):
 
                 # adjust period length for last period's bias
                 dt = timestamp - data['expected']
-                next_period_length = max(period_length - player.session.config['max_adjustment'], period_length - dt)
+                next_period_length = max(period_length - player.max_adjustment, period_length - dt)
 
                 return {0: dict(
                     type = type,
@@ -276,6 +282,7 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
+    timeout_seconds = 10
     def is_displayed(player):
         return player.session.config['simulation'] == False
     
@@ -308,6 +315,8 @@ def creating_session(subsession: Subsession):
         row['population_size'] = int(row['population_size'])
         row['initial_confidence_lower'] = float(row['initial_confidence_lower'])
         row['initial_confidence_upper'] = float(row['initial_confidence_upper'])
+        row['mseconds_per_period'] = int(row['mseconds_per_period'])
+        row['max_adjustment'] = int(row['max_adjustment'])
 
     # save it in a participant variable in case we ever need it
     if subsession.round_number == 1:
@@ -370,6 +379,8 @@ def creating_session(subsession: Subsession):
         p.action = draw_initial_action()
         p.joint_payoff_info = current_config['joint_payoff_info']
         p.relative_payoff_info = current_config['relative_payoff_info']
+        p.mseconds_per_period = current_config['mseconds_per_period']
+        p.max_adjustment = current_config['max_adjustment']
 
 
 def draw_initial_action():
