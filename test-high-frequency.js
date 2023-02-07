@@ -6,8 +6,8 @@ js_vars.relative_payoff_info = true;
 var p1_fakeaction = 0.3;
 var p2_fakeaction = 0.4;
 
-var p1_fakepayoff = p1_fakeaction * (js_vars.confidence - p1_fakeaction - p2_fakeaction) * 100;
-var p2_fakepayoff = p2_fakeaction * (js_vars.partner_confidence - p1_fakeaction - p2_fakeaction) * 100;
+var p1_fakepayoff = payoff(js_vars.confidence, p1_fakeaction, p2_fakeaction, gamma = js_vars.gamma)
+var p2_fakepayoff = payoff(js_vars.partner_confidence, p2_fakeaction, p1_fakeaction, gamma = js_vars.gamma)
 
 var fakedata = {
   next_period_length: 4000,
