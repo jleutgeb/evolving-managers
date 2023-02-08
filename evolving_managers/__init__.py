@@ -449,7 +449,7 @@ def update_confidence(subsession):
                 if next_confidence > C.MAX_CONFIDENCE:
                     next_confidence = C.MAX_CONFIDENCE
                 elif next_confidence < C.MIN_CONFIDENCE:
-                    next_confidence = C.MAX_CONFIDENCE
+                    next_confidence = C.MIN_CONFIDENCE
             if subsession.round_number < C.NUM_ROUNDS:
                 p.in_round(subsession.round_number+1).confidence = next_confidence
         
