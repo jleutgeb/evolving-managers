@@ -1,5 +1,5 @@
 {{ block title }}
-    Anleitung
+    Anleitung Teil 1
 {{ endblock }}
 {{ block content }}
 
@@ -30,7 +30,9 @@
 </h5>
 
 <p>
-    Dieses Experiment besteht aus {{ num_rounds }} Spielen.
+    Dieses Experiment besteht aus zwei Teilen.
+    Die Bezahlung der beiden Teile ist voneinander unabhängig. 
+    Dieser Teil besteht aus {{ num_rounds }} Spielen.
     In jedem Spiel werden Sie vom Computer anonym mit einem anderen zufälligen Mitspieler gematcht.
     Jedes Spiel wird dabei in {{ num_periods }} Perioden unterteilt.
     In jeder Periode werden Sie und Ihr Mitspieler geheim Aktionen auswählen. 
@@ -55,8 +57,11 @@
 <p>
     Die folgende Abbildung zeigt das Computerdisplay, mit dem Sie Entscheidungen treffen und mit Ihrem Mitspieler interagieren werden. 
 </p>
+{{ if joint_payoff_info and relative_payoff_info }}
 
-{{ if joint_payoff_info }}
+<img src={{ static 'interface_joint_rel.png' }}>
+
+{{ elif joint_payoff_info and not relative_payoff_info }}
 
 <img src={{ static 'interface_joint.png' }}>
 
@@ -75,7 +80,28 @@
     Ihre tatsächliche Aktion für die gesamte Periode wird ausschließlich durch die Position der roten Linie <b>am Ende der Periode</b> festgelegt.
 </p>
 
-<p>
+<ul>
+    <li>Nachdem eine Periode vergangen ist, werden Sie ein <b>rotes Quadrat</b> sehen, das <b>Ihre Aktion</b> in der vergangenen Periode anzeigt.
+        Über diesem Punkt sehen Sie ein einen <b>roten Punkt</b>, der <b>Ihre Punkte</b> in der vergangenen Periode anzeigt. Je höher der Punkt, desto mehr Punkte haben Sie gewonnen. </li>
+    <li>Die genaue Anzahl der Punkte, die Sie in diesem Spiel und in der vergangenen Periode verdient haben, können Sie am oberen Bildschirmrand sehen.</li>
+    <li>Gleichzeitig werden Sie am unteren Rand des Bildschirms ein <b>blaues Quadrat</b> sehen, das die <b>Aktion Ihres Mitspielers</b> in der vergangenen Periode anzeigt. </li>
+    {{ if joint_payoff_info }} <li>Über diesem Punkt sehen Sie einen <b>blauen Punkt</b>, der die <b>Punkte Ihres Mitspielers</b> in der vergangenen Periode anzeigt.</li>
+    {{ endif }}
+    <li>Schließlich werden Sie eine schwarze Linie sehen, die Ihnen anzeigt, wie viele Punkte Sie an jeder Position Ihres Schiebereglers verdienen hätten können, 
+        je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat.</li>
+    {{ if joint_payoff_info }} <li>Zusätzlich werden sie eine schwarze gestrichelte Linie sehen, die Ihnen anzeigt, wie viele Punkte <b>Sie und Ihr Mitspieler gemeinsam</b> an jeder Position Ihres Schiebereglers 
+        verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat. 
+        Der schwarze Punkt zeigt an, wie viele Punkte Sie und Ihr Mitspieler in der vergangenen Periode insgesamt verdient haben.</li>
+    {{ endif }}
+    {{ if relative_payoff_info }} <li>Darunter werden sie eine schwarze gepunktete Linie sehen, die Ihnen anzeigt, wie groß der absolute Punkteunterschied <b>zwischen Ihnen und Ihrem Mitspieler</b> 
+        an jeder Position Ihres Schiebereglers sein hätte können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat. Je näher diese Linie an Null ist, desto geringer
+        ist der Unterschied zwischen den beiden Punkten.
+    </li>
+    {{ endif }}
+
+</ul>
+
+<!-- <p>
     Nachdem eine Periode vergangen ist, werden Sie ein <b>rotes Quadrat</b> sehen, das <b>Ihre Aktion</b> in der vergangenen Periode anzeigt.
     Über diesem Punkt sehen Sie ein einen <b>roten Punkt</b>, der <b>Ihre Punkte</b> in der vergangenen Periode anzeigt. 
     Je höher der Punkt, desto mehr Punkte haben Sie gewonnen. 
@@ -84,9 +110,11 @@
     {{ if joint_payoff_info }} Über diesem Punkt sehen Sie einen <b>blauen Punkt</b>, der die <b>Punkte Ihres Mitspielers</b> in der vergangenen Periode anzeigt.
     {{ endif }}
     Schließlich werden Sie eine schwarze Linie sehen, die Ihnen anzeigt, wie viele Punkte Sie an jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat.
-    {{ if joint_payoff_info }} Zusätzlich werden sie eine schwarze gestrichelte Linie sehen, die Ihnen anzeigt, wie viele Punkte <b>Sie und Ihr Mitspieler gemeinsam</b> dan jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat. Der schwarze Punkt zeigt an, wie viele Punkte Sie und Ihr Mitspieler in der vergangenen Periode insgesamt verdient haben.
+    {{ if joint_payoff_info }} Zusätzlich werden sie eine schwarze gestrichelte Linie sehen, die Ihnen anzeigt, wie viele Punkte <b>Sie und Ihr Mitspieler gemeinsam</b> an jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat. Der schwarze Punkt zeigt an, wie viele Punkte Sie und Ihr Mitspieler in der vergangenen Periode insgesamt verdient haben.
     {{ endif }}
-</p>
+    {{ if relative_payoff_info }} Darunter werden sie eine schwarze gepunktete Linie sehen, die Ihnen anzeigt, wie groß der Punkteunterschied <b>zwischen Ihnen umd Ihrem Mitspieler</b> an jeder Position Ihres Schiebereglers verdienen hätten können, je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat. Der schwarze Punkt zeigt an, wie viele Punkte Sie und Ihr Mitspieler in der vergangenen Periode insgesamt verdient haben.
+    {{ endif }}
+</p> -->
 
 <p>
     Es ist wichtig, dass Sie sich bewusst sind, dass alle Informationen stets die Ergebnisse der vergangenen Periode darstellen. 
@@ -104,6 +132,7 @@
     Für {{ conversion_rate }} Punkte werden Sie 1 Euro erhalten. 
     Ihre Punkte werden sich im Laufe des Experiments ansammeln. Ihre bisher verdienten Punkte werden Ihnen nach jedem Spiel angezeigt.     
     Zusätzlich erhalten Sie {{ participation_fee }} für die Teilnahme an diesem Experiment. 
+    Die Bezahlung der beiden Teile ist voneinander unabhängig. 
 </p>
 
 <p>

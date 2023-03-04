@@ -1,3 +1,5 @@
+// load up decision.html and copy/paste this code into the browser console
+
 js_vars.confidence = 1.1;
 js_vars.partner_confidence = 1.0;
 

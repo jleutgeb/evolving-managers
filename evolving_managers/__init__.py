@@ -84,20 +84,45 @@ class Instructions(Page):
     def vars_for_template(player: Player):
         current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         return dict(
-            num_rounds = C.NUM_ROUNDS,
+            num_rounds = current_config['end_supergame'] - current_config['start_supergame'] + 1,
             num_periods = player.group.num_periods,
             period_length = round(player.mseconds_per_period/1000),
             conversion_rate = player.session.config['conversion_rate'],
             joint_payoff_info = player.joint_payoff_info,
             relative_payoff_info = player.relative_payoff_info,
             participation_fee = player.session.config['participation_fee'],
-            treatment = current_config['treatment']
+            treatment = current_config['treatment'],
             )
 
     def is_displayed(player):
         current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         # only show instructions page at the beginning of a new supergame and if we are not simulating
-        return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame']
+        #return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] # can be used to run different treatments with alternative instructions between-subjects
+        return player.session.config['simulation'] == False and player.subsession.round_number == 1
+
+
+# PAGES
+class InstructionsPart2(Page):
+    # on the instructions page send some data to the template: number of supergames, number of periods within each supergame, how long each period is (in seconds) and how many points convert to one Euro
+    # also, obviously, only display this page in the first supergame, and don't if we are running a simulation
+    @staticmethod
+    def vars_for_template(player: Player):
+        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
+        return dict(
+            num_rounds = current_config['end_supergame'] - current_config['start_supergame'] + 1,
+            num_periods = player.group.num_periods,
+            period_length = round(player.mseconds_per_period/1000),
+            conversion_rate = player.session.config['conversion_rate'],
+            joint_payoff_info = player.joint_payoff_info,
+            relative_payoff_info = player.relative_payoff_info,
+            participation_fee = player.session.config['participation_fee'],
+            treatment = current_config['treatment'],
+            )
+
+    def is_displayed(player):
+        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
+        # only show instructions page at the beginning of a new supergame, and if we are not simulating and not in the first round
+        return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
 
 
 class SetupWaitPage(WaitPage):
@@ -131,17 +156,19 @@ class SetupWaitPage(WaitPage):
 class Decision(Page):
     @staticmethod
     def vars_for_template(player: Player):
+        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         # if we are in the first period, it is not incentivized, so simply return a period payoff of zero. 
         if player.period == 0:
             period_payoff = float(0)
+        # whenever the page is (re)loaded, the current period payoff and the cumulative payoff up to that period are sent to the page
         else:
             period_payoff = round(player.period_payoff,1)
 
-        # whenever the page is (re)loaded, the current period payoff and the cumulative payoff up to that period are sent to the page
         return dict(
             round_payoff = round(player.round_payoff,1),
             period_payoff = period_payoff,
-            period = player.group.period + 1
+            period = player.group.period + 1,
+            max_rounds = current_config['end_supergame'],
         )
 
     # just some variables for javascript
@@ -294,7 +321,7 @@ class Results(Page):
         )
 
 
-page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results]
+page_sequence = [Instructions, InstructionsPart2, SetupWaitPage, Decision, ResultsWaitPage, Results]
 
 
 # FUNCTIONS

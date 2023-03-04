@@ -1,0 +1,41 @@
+{{ block title }}
+    Anleitung Teil 2
+{{ endblock }}
+{{ block content }}
+
+<h5>
+    Willkommen zu Teil 2
+</h5>
+
+<p>
+    Dieser Teil besteht aus {{ num_rounds }} Spielen. 
+    In diesem Teil werden Sie das gleiche Spiel wie in Teil 1 spielen, aber das Spiel beginnt mit einer anderen Anfangssituation. 
+</p>
+
+<p>
+    Ihre Punkte werden auf die gleiche Weise wie in Teil 1 berechnet. Es gelten die gleichen Hinweise wie in Teil 1:
+</p>
+
+<ul>
+    <li>Ihre Punkte in jeder Periode hängen einzig und allein von Ihrer Aktion und der Aktion Ihres Mitspielers ab.</li>
+    <li>Die Funktion, die Ihre Punkte bestimmt, wird sich während eines Spiels nicht verändern. </li>
+    <li>Wenn Sie und Ihr Mitspieler während eines Spiels die gleichen Aktionen zu den Zeitpunkten A und B wählen, werden Sie beide den gleichen Gewinn zu Zeitpunkt A wie zu Zeitpunkt B machen.</li>
+    <li>Zwischen den Spielen kann sich die Funktion ändern.</li>
+</ul>
+
+
+<div>
+    <button id="next_button" class="btn btn-primary btn-large" hidden>Weiter</button>
+</div>
+
+{{ endblock }}
+
+
+{{ block scripts }}
+<script>
+    const button = document.getElementById('next_button');
+    setTimeout(function() {
+        button.removeAttribute('hidden');
+        }, 2000);
+</script>
+{{ endblock }}
