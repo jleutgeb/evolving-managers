@@ -10,6 +10,7 @@ SESSION_CONFIGS = [
         simulation = False, # if simulated, the program will just play the best-reply
         conversion_rate = 1000, # how many points for 1 Euro
         participation_fee = 6.0,
+        treatment_file = 'demo.csv',
     ),
 ]
 

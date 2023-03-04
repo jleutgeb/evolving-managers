@@ -327,7 +327,8 @@ page_sequence = [Instructions, InstructionsPart2, SetupWaitPage, Decision, Resul
 # FUNCTIONS
 def creating_session(subsession: Subsession):
     # read the config file first read the config
-    with open('evolving_managers/config/demo.csv', newline='') as csvfile:
+    path = 'evolving_managers/config/'+subsession.session.config['treatment_file']
+    with open(path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         configs = [row for row in reader]
     
@@ -465,6 +466,7 @@ def update_confidence(subsession):
         
         # randomly draw if a firm selects their manager. if they do, add a random uniform error in the target's confidence
         for p in population:
+            current_config = [config for config in p.participant.configs if config['start_supergame'] <= p.round_number and config['end_supergame'] >= p.round_number][0]
             if random.random() > p.prob_selection:
                 p.selected = False
                 next_confidence = p.confidence
@@ -477,7 +479,8 @@ def update_confidence(subsession):
                     next_confidence = C.MAX_CONFIDENCE
                 elif next_confidence < C.MIN_CONFIDENCE:
                     next_confidence = C.MIN_CONFIDENCE
-            if subsession.round_number < C.NUM_ROUNDS:
+            # only update if we are not in the last supergame
+            if subsession.round_number != current_config['end_supergame'] :
                 p.in_round(subsession.round_number+1).confidence = next_confidence
         
         i += 1
