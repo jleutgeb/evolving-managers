@@ -492,14 +492,11 @@ def save_period(player):
         group = player.group,
         supergame = player.round_number,
         period = player.group.period,
-        gamma = player.group.gamma,
-        confidence = player.confidence,
         action = player.action,
         period_payoff = player.period_payoff,
         period_fitness = player.period_fitness,
         timestamp = player.timestamp,
-        expected_timestamp = player.group.expected_timestamp,
-        joint_payoff_info = player.joint_payoff_info
+        expected_timestamp = player.group.expected_timestamp
         )
 
 
@@ -513,14 +510,11 @@ def custom_export(players):
         'player.id',
         'player.supergame',
         'player.period',
-        'group.gamma',
-        'player.confidence',
         'player.action',
         'player.payoff',
         'player.fitness',
         'player.timestamp',
         'player.expected_timestamp',
-        'player.joint_payoff_info'
     ]
     for p in players:
         pp = p.participant
@@ -534,12 +528,9 @@ def custom_export(players):
                 p.id_in_group,
                 obs.supergame,
                 obs.period,
-                obs.gamma,
-                obs.confidence,
                 obs.action,
                 obs.period_payoff,
                 obs.period_fitness,
                 obs.timestamp,
                 obs.expected_timestamp,
-                obs.joint_payoff_info
             ]
