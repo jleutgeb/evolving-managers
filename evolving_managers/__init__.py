@@ -311,7 +311,7 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    timeout_seconds = 10
+    timeout_seconds = 5
     #def is_displayed(player):
     #    return player.session.config['simulation'] == False
     
