@@ -26,8 +26,9 @@ class Player(BasePlayer):
 
 # PAGES
 class Consent(Page):
-    def is_displayed(player):
-        return player.session.config['simulation'] == False
+    pass
+    #def is_displayed(player):
+    #    return player.session.config['simulation'] == False
 
 
 page_sequence = [Consent]
