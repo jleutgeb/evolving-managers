@@ -345,6 +345,7 @@ def creating_session(subsession: Subsession):
         row['initial_confidence_upper'] = float(row['initial_confidence_upper'])
         row['mseconds_per_period'] = int(row['mseconds_per_period'])
         row['max_adjustment'] = int(row['max_adjustment'])
+        row['treatment_id'] = int(row['treatment_id'])
 
     # save it in a participant variable in case we ever need it
     if subsession.round_number == 1:
@@ -374,7 +375,7 @@ def creating_session(subsession: Subsession):
         # assign initial confidence, else grab confidence from first round of current treatment
         # alternate populations' initial confidence
         if subsession.round_number == current_config['start_supergame']:
-            if i % 2 == 0:
+            if i % 2 == current_config['treatment_id'] % 2:
                 confidence = current_config['initial_confidence_lower']
             else:
                 confidence = current_config['initial_confidence_upper']
