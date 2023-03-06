@@ -98,7 +98,8 @@ class Instructions(Page):
         current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         # only show instructions page at the beginning of a new supergame and if we are not simulating
         #return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] # can be used to run different treatments with alternative instructions between-subjects
-        return player.session.config['simulation'] == False and player.subsession.round_number == 1
+        #return player.session.config['simulation'] == False and player.subsession.round_number == 1
+        return player.subsession.round_number == 1
 
 
 # PAGES
@@ -122,7 +123,8 @@ class InstructionsPart2(Page):
     def is_displayed(player):
         current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
         # only show instructions page at the beginning of a new supergame, and if we are not simulating and not in the first round
-        return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
+        #return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
+        return player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
 
 
 class SetupWaitPage(WaitPage):
@@ -310,8 +312,8 @@ class ResultsWaitPage(WaitPage):
 
 class Results(Page):
     timeout_seconds = 10
-    def is_displayed(player):
-        return player.session.config['simulation'] == False
+    #def is_displayed(player):
+    #    return player.session.config['simulation'] == False
     
     @staticmethod
     def vars_for_template(player: Player):
