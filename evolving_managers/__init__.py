@@ -418,10 +418,9 @@ def draw_initial_action():
 
 def payoff_function(type, player, partner):
     if type == 'payoff':
-        intercept = player.confidence
+        return player.action * max(0, player.confidence - player.action - partner.action * player.group.gamma) * 100 # scale up by 100 to have nicer numbers
     elif type == 'fitness':
-        intercept = 1
-    return player.action * max(0, intercept - player.action - partner.action * player.group.gamma) * 100 # scale up by 100 to have nicer numbers
+        return player.action * (1 - player.action - partner.action * player.group.gamma) * 100 # scale up by 100 to have nicer numbers
 
 
 def update_group_vars(group):
