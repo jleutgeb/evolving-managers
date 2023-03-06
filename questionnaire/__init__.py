@@ -43,7 +43,7 @@ class Questionnaire(Page):
     form_fields = ['gender', 'age', 'field', 'semesters', 'strategy', 'comments']
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
-        player.participant.payoff = ceil(player.participant.payoff * 2) / 2
+        player.participant.payoff = ceil(player.participant.payoff * 10) / 10
 
 
 page_sequence = [Questionnaire]
