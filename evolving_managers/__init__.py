@@ -367,8 +367,6 @@ def creating_session(subsession: Subsession):
     num_populations = max([p.population for p in players])
     new_group_matrix = []
     i = 1
-    # draw random order for populations' initial confidence
-    order = random.random() > 0.5
     
     while i <= num_populations:
         population = [p for p in players if p.population == i]
@@ -376,7 +374,7 @@ def creating_session(subsession: Subsession):
         # assign initial confidence, else grab confidence from first round of current treatment
         # alternate populations' initial confidence
         if subsession.round_number == current_config['start_supergame']:
-            if order % 2 == i % 2:
+            if i % 2 == 0:
                 confidence = current_config['initial_confidence_lower']
             else:
                 confidence = current_config['initial_confidence_upper']
