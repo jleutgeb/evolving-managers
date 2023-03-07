@@ -38,12 +38,18 @@ class Player(BasePlayer):
                                       label="Haben Sie noch andere Kommentare oder Fragen zu diesem Experiment?")
 
 # PAGES
+class RoundPayments(WaitPage):
+    def after_all_players_arrive(group: Group):
+        for p in group.get_players():
+            p.participant.payoff = ceil(p.participant.payoff * 10) / 10
+
+
 class Questionnaire(Page):
     form_model = "player"
     form_fields = ['gender', 'age', 'field', 'semesters', 'strategy', 'comments']
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened):
-        player.participant.payoff = ceil(player.participant.payoff * 10) / 10
+    # @staticmethod
+    # def before_next_page(player: Player, timeout_happened):
+    #     player.participant.payoff = ceil(player.participant.payoff * 10) / 10
 
 
-page_sequence = [Questionnaire]
+page_sequence = [RoundPayments, Questionnaire]
