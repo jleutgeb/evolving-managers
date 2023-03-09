@@ -506,16 +506,16 @@ def save_period(player):
 def custom_export(players):
     yield [
         'session.code', 
-        'participant.id', 
+        'participant.id_in_session', 
         'participant.code',
-        'participant.population',
-        'group.id',
-        'player.id',
-        'player.supergame',
+        'player.population',
+        'group.id_in_subsession',
+        'player.id_in_group',
+        'subsession.round_number',
         'player.period',
         'player.action',
-        'player.payoff',
-        'player.fitness',
+        'player.period_payoff',
+        'player.period_fitness',
         'player.timestamp',
         'player.expected_timestamp',
     ]
