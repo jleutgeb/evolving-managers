@@ -13,7 +13,7 @@ Your app description
 class C(BaseConstants):
     NAME_IN_URL = 'evolving_managers'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 120 # number of supergames
+    NUM_ROUNDS = 60 # number of supergames
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
     NOISE_RANGE = 0.1 # range for noise when imitating [-NOISE_RANGE,NOISE_RANGE]
     MIN_CONFIDENCE = 0.5
@@ -100,31 +100,6 @@ class Instructions(Page):
         #return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] # can be used to run different treatments with alternative instructions between-subjects
         #return player.session.config['simulation'] == False and player.subsession.round_number == 1
         return player.subsession.round_number == 1
-
-
-# PAGES
-class InstructionsPart2(Page):
-    # on the instructions page send some data to the template: number of supergames, number of periods within each supergame, how long each period is (in seconds) and how many points convert to one Euro
-    # also, obviously, only display this page in the first supergame, and don't if we are running a simulation
-    @staticmethod
-    def vars_for_template(player: Player):
-        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
-        return dict(
-            num_rounds = current_config['end_supergame'] - current_config['start_supergame'] + 1,
-            num_periods = player.group.num_periods,
-            period_length = round(player.mseconds_per_period/1000),
-            conversion_rate = player.session.config['conversion_rate'],
-            joint_payoff_info = player.joint_payoff_info,
-            relative_payoff_info = player.relative_payoff_info,
-            participation_fee = player.session.config['participation_fee'],
-            treatment = current_config['treatment'],
-            )
-
-    def is_displayed(player):
-        current_config = [config for config in player.participant.configs if config['start_supergame'] <= player.round_number and config['end_supergame'] >= player.round_number][0]
-        # only show instructions page at the beginning of a new supergame, and if we are not simulating and not in the first round
-        #return player.session.config['simulation'] == False and player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
-        return player.subsession.round_number == current_config['start_supergame'] and not player.round_number == 1
 
 
 class SetupWaitPage(WaitPage):
@@ -326,7 +301,7 @@ class Results(Page):
         )
 
 
-page_sequence = [Instructions, InstructionsPart2, SetupWaitPage, Decision, ResultsWaitPage, Results]
+page_sequence = [Instructions, SetupWaitPage, Decision, ResultsWaitPage, Results]
 
 
 # FUNCTIONS

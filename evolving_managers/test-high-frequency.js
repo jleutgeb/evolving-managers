@@ -3,7 +3,7 @@
 js_vars.confidence = 1.1;
 js_vars.partner_confidence = 1.0;
 
-myChart.data.datasets[6].hidden = false
+myChart.data.datasets[6].hidden = true
 myChart.data.datasets[8].hidden = false
 
 var p1_fakeaction = 0.35;

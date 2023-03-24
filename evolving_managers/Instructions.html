@@ -57,11 +57,11 @@
 <p>
     Die folgende Abbildung zeigt das Computerdisplay, mit dem Sie Entscheidungen treffen und mit Ihrem Mitspieler interagieren werden. 
 </p>
-{{ if joint_payoff_info and relative_payoff_info }}
+{{ if relative_payoff_info }}
 
-<img src={{ static 'interface_joint_rel.png' }}>
+<img src={{ static 'interface_rel.png' }}>
 
-{{ elif joint_payoff_info and not relative_payoff_info }}
+{{ elif joint_payoff_info }}
 
 <img src={{ static 'interface_joint.png' }}>
 
