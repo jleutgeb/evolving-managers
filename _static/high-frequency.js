@@ -41,6 +41,7 @@ const minaction = 0;
 const maxaction = 1;
 const stepsize = 0.01; // used to draw the counterfactual payoff
 const numchoices = (maxaction - minaction) / stepsize + 1  
+const hide_partner_payoff = !(js_vars.joint_payoff_info || js_vars.relative_payoff_info) ? true:false;
 
 const myChart = new Chart(ctx, {
     type: 'scatter',
@@ -76,7 +77,7 @@ const myChart = new Chart(ctx, {
                 data: coordinateArray(partner_action, partner_period_payoff), // partner's payoff
                 backgroundColor: 'rgb(0, 0, 255)',
                 pointRadius: 5,
-                hidden: !js_vars.joint_payoff_info,
+                hidden: hide_partner_payoff,
             },
             {
                 data: coordinateArray(action, period_payoff+partner_period_payoff), // joint payoff
