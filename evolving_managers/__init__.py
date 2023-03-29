@@ -15,7 +15,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 60 # number of supergames
     ACTION_DECIMAL_PLACES = 3 # how fine is the action grid (bounded by 0 and 1). with 3 it's 0, 0.001, 0.002, etc
-    NOISE_RANGE = 0.1 # range for noise when imitating [-NOISE_RANGE,NOISE_RANGE]
+    NOISE_RANGE = 0.3 # support for noise when imitating, ~U[-NOISE_RANGE/2,NOISE_RANGE/2]
     MIN_CONFIDENCE = 0.5
     MAX_CONFIDENCE = 2.0
 
@@ -91,7 +91,6 @@ class Instructions(Page):
             joint_payoff_info = player.joint_payoff_info,
             relative_payoff_info = player.relative_payoff_info,
             participation_fee = player.session.config['participation_fee'],
-            treatment = current_config['treatment'],
             )
 
     def is_displayed(player):
@@ -360,7 +359,7 @@ def creating_session(subsession: Subsession):
             else:
                 confidence = current_config['initial_confidence_upper']
             for p in population:
-                p.confidence = confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
+                p.confidence = confidence + random.uniform(-C.NOISE_RANGE/2, C.NOISE_RANGE/2)
                 p.initial_population_confidence = confidence
         else:
             for p in population:
@@ -452,7 +451,7 @@ def update_confidence(subsession):
                 p.selected = True
                 imitation_target = random.choices(population, [pl.prob_imitation_target for pl in population])[0]
                 p.imitation_target = imitation_target.participant.id_in_session
-                next_confidence = imitation_target.confidence + random.uniform(-C.NOISE_RANGE, C.NOISE_RANGE)
+                next_confidence = imitation_target.confidence + random.uniform(-C.NOISE_RANGE/2, C.NOISE_RANGE/2)
                 if next_confidence > C.MAX_CONFIDENCE:
                     next_confidence = C.MAX_CONFIDENCE
                 elif next_confidence < C.MIN_CONFIDENCE:
