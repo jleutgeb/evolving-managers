@@ -1,5 +1,5 @@
 {{ block title }}
-    Anleitung Teil 1
+    Anleitung
 {{ endblock }}
 {{ block content }}
 
@@ -30,9 +30,7 @@
 </h5>
 
 <p>
-    Dieses Experiment besteht aus zwei Teilen.
-    Die Bezahlung der beiden Teile ist voneinander unabhängig. 
-    Dieser Teil besteht aus {{ num_rounds }} Spielen.
+    Dieses Experiment besteht aus {{ num_rounds }} Spielen.
     In jedem Spiel werden Sie vom Computer anonym mit einem anderen zufälligen Mitspieler gematcht.
     Jedes Spiel wird dabei in {{ num_periods }} Perioden unterteilt.
     In jeder Periode werden Sie und Ihr Mitspieler geheim Aktionen auswählen. 
@@ -131,7 +129,6 @@
     Für {{ conversion_rate }} Punkte werden Sie 1 Euro erhalten. 
     Ihre Punkte werden sich im Laufe des Experiments ansammeln. Ihre bisher verdienten Punkte werden Ihnen nach jedem Spiel angezeigt.     
     Zusätzlich erhalten Sie {{ participation_fee }} für die Teilnahme an diesem Experiment. 
-    Die Bezahlung der beiden Teile ist voneinander unabhängig. 
 </p>
 
 <p>
