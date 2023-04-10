@@ -2,13 +2,40 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='evolving_managers',
+        name='Evolving Managers Demo',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
         simulation = False, # if simulated, the program will just play the best-reply
         conversion_rate = 1000, # how many points for 1 Euro
         participation_fee = 6.0,
         treatment_file = 'demo.csv',
+    ),
+    dict(
+        name='Evolving Managers Baseline',
+        app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
+        num_demo_participants = 2,
+        simulation = False, # if simulated, the program will just play the best-reply
+        conversion_rate = 1000, # how many points for 1 Euro
+        participation_fee = 6.0,
+        treatment_file = 'baseline.csv',
+    ),
+    dict(
+        name='Evolving Managers Joint',
+        app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
+        num_demo_participants = 2,
+        simulation = False, # if simulated, the program will just play the best-reply
+        conversion_rate = 1000, # how many points for 1 Euro
+        participation_fee = 6.0,
+        treatment_file = 'joint.csv',
+    ),
+    dict(
+        name='Evolving Managers Relative',
+        app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
+        num_demo_participants = 2,
+        simulation = False, # if simulated, the program will just play the best-reply
+        conversion_rate = 1000, # how many points for 1 Euro
+        participation_fee = 6.0,
+        treatment_file = 'relative.csv',
     ),
 ]
 
