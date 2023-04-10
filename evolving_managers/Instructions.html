@@ -83,7 +83,7 @@
         Über diesem Punkt sehen Sie ein einen <b>roten Punkt</b>, der <b>Ihre Punkte</b> in der vergangenen Periode anzeigt. Je höher der Punkt, desto mehr Punkte haben Sie gewonnen. </li>
     <li>Die genaue Anzahl der Punkte, die Sie in diesem Spiel und in der vergangenen Periode verdient haben, können Sie am oberen Bildschirmrand sehen.</li>
     <li>Gleichzeitig werden Sie am unteren Rand des Bildschirms ein <b>blaues Quadrat</b> sehen, das die <b>Aktion Ihres Mitspielers</b> in der vergangenen Periode anzeigt. </li>
-    {{ if joint_payoff_info }} <li>Über diesem Punkt sehen Sie einen <b>blauen Punkt</b>, der die <b>Punkte Ihres Mitspielers</b> in der vergangenen Periode anzeigt.</li>
+    {{ if joint_payoff_info or relative_payoff_info }} <li>Über diesem Punkt sehen Sie einen <b>blauen Punkt</b>, der die <b>Punkte Ihres Mitspielers</b> in der vergangenen Periode anzeigt.</li>
     {{ endif }}
     <li>Schließlich werden Sie eine schwarze Linie sehen, die Ihnen anzeigt, wie viele Punkte Sie an jeder Position Ihres Schiebereglers verdienen hätten können, 
         je nachdem welche Aktion ihr Mitspieler in der vergangenen Periode gewählt hat.</li>
