@@ -2,7 +2,7 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='Evolving Managers Demo',
+        name='evolving_managers_demo',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
         simulation = False, # if simulated, the program will just play the best-reply
@@ -11,7 +11,7 @@ SESSION_CONFIGS = [
         treatment_file = 'demo.csv',
     ),
     dict(
-        name='Evolving Managers Baseline',
+        name='evolving_managers_baseline',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
         simulation = False, # if simulated, the program will just play the best-reply
@@ -20,7 +20,7 @@ SESSION_CONFIGS = [
         treatment_file = 'baseline.csv',
     ),
     dict(
-        name='Evolving Managers Joint',
+        name='evolving_managers_joint',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
         simulation = False, # if simulated, the program will just play the best-reply
@@ -29,7 +29,7 @@ SESSION_CONFIGS = [
         treatment_file = 'joint.csv',
     ),
     dict(
-        name='Evolving Managers Relative',
+        name='evolving_managers_relative',
         app_sequence=['consent', 'evolving_managers', 'questionnaire', 'payment_info'],
         num_demo_participants = 2,
         simulation = False, # if simulated, the program will just play the best-reply
