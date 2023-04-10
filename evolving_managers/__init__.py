@@ -34,7 +34,7 @@ class Group(BaseGroup):
     period = models.IntegerField(initial=0) # current period the group is in
     supergame_started = models.BooleanField(initial=False) # track whether the supergame has started
     num_periods = models.IntegerField() # how many periods are in a supergame
-    session_config = models.IntegerField()
+    session_config = models.StringField()
 
 
 class Player(BasePlayer):
@@ -379,7 +379,7 @@ def creating_session(subsession: Subsession):
     for g in subsession.get_groups():
         g.gamma = current_config['gamma']
         g.num_periods = current_config['num_periods']
-        g.session_config = current_config['treatment_file']
+        g.session_config = subsession.session.config['treatment_file']
 
     # draw player's initial action and assign treatment variables
     for p in subsession.get_players():
