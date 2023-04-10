@@ -1,0 +1,2 @@
+treatment_id,start_supergame,end_supergame,num_periods,gamma,joint_payoff_info,relative_payoff_info,population_size,initial_confidence_lower,initial_confidence_upper,mseconds_per_period,max_adjustment
+1,1,60,8,1.0,True,False,8,1.0,1.0,4000,100
